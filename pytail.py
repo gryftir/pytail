@@ -18,9 +18,11 @@ def get_count(string):
 
 def is_verbose(args):
     verbose = False
-    if (len(args.files) > 1 or args.verbose) and not args.quiet:
+    if len(args.files) > 1 or args.verbose:
         verbose = True
-        return verbose
+    if args.quiet:
+        verbose = False
+    return verbose
 
 
 def is_bytes(args):
@@ -125,8 +127,8 @@ def main():
     #description='output appended data as the file grows',
     #nargs='*')
     loud = parse.add_mutually_exclusive_group()
-    loud.add_argument('-v', '--verbose', action='store_false')
-    loud.add_argument('-q', '--quiet', '--silent', action='store_false')
+    loud.add_argument('-q', '--quiet', '--silent', action='store_true')
+    loud.add_argument('-v', '--verbose', action='store_true')
     size = parse.add_mutually_exclusive_group()
     size.add_argument(
         '-c', '--bytes',
