@@ -11,6 +11,8 @@ verbose and quiet both work
 basic help works
 works for multiple files including - as stdin as per posix
 
+TODO:
+haven't implemented -f/--follow yet
 
 
 
