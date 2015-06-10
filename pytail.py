@@ -36,7 +36,7 @@ def is_lines(args):
 def byte_or_lines(args):
     by_line = True
     string = '10'
-    seek_from = os.SEEK_END
+    from_file_start = False
     if is_bytes(args):
         by_line = False
         string = args.bytes[0]
@@ -44,14 +44,14 @@ def byte_or_lines(args):
         string = args.lines[0]
     count = get_count(string)
     if string[0] == '+':
-        seek_from = os.SEEK_SET
+        from_file_start = True
     if count < 0:
         count += 1
-    return (count, by_line, seek_from)
+    return (count, by_line, from_file_start)
 
 
-def by_line_print(fh, filehandle, count, seek_from, out):
-    if seek_from == os.SEEK_SET:
+def by_line_print(fh, filehandle, count, from_file_start, out):
+    if from_file_start:
         #we need to skip count lines and it's negative so count up)
         for line in fh:
             if count < 0:
@@ -65,30 +65,31 @@ def by_line_print(fh, filehandle, count, seek_from, out):
             out.write(line)
 
 
-def by_byte_print(fh, filename, count, seek_from, out):
+def by_byte_print(fh, filename, count, from_file_start, out):
     if filename == 'standard input':
-        if seek_from == os.SEEK_SET:
+        if from_file_start:
             fh.read(abs(count))
         else:
             data = fh.read()
             out.write(data[-1 * (count):])
 
     else:
+        seek_from = os.SEEK_SET if from_file_start else os.SEEK_END
         fh.seek(count * -1, seek_from)
     for line in fh:
         out.write(line)
 
 
-def style_print(fh, filename, count, seek_from, by_line):
+def style_print(fh, filename, count, from_file_start, by_line):
     if by_line:
-        by_line_print(fh, filename, count, seek_from, sys.stdout)
+        by_line_print(fh, filename, count, from_file_start, sys.stdout)
     else:
-        by_byte_print(fh, filename, count, seek_from, sys.stdout)
+        by_byte_print(fh, filename, count, from_file_start, sys.stdout)
 
 
 def generate_print_func(args):
     verbose = is_verbose(args)
-    (count, by_line, seek_from) = byte_or_lines(args)
+    (count, by_line, from_file_start) = byte_or_lines(args)
 
     def print_func(filename):
         fh = None
@@ -105,7 +106,7 @@ def generate_print_func(args):
                 return
         if verbose:
             print '==> {} <=='.format(print_name)
-        style_print(fh, filename, count, seek_from, by_line)
+        style_print(fh, filename, count, from_file_start, by_line)
         if filename != '-':
             fh.close()
         return
