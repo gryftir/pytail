@@ -11,7 +11,7 @@ from collections import deque
 
 def get_count(string):
     if string[0] == '+':
-        return int( int(string[1:], 10) * -1)
+        return int(int(string[1:], 10) * -1)
     else:
         return int(string, 10)
 
@@ -71,7 +71,7 @@ def by_byte_print(fh, count, seek_from):
             fh.read(abs(count))
         else:
             data = fh.read()
-            sys.stdout.write(data[ -1 * (count):])
+            sys.stdout.write(data[-1 * (count):])
 
     else:
         fh.seek(count * -1, seek_from)
@@ -121,7 +121,7 @@ def handle_args(args):
         print_func('-')
 
 
-def main():
+def config_args():
     parse = argparse.ArgumentParser(description='a python version of tail')
     #parse.add_argument('-f', '--follow',
     #description='output appended data as the file grows',
@@ -143,7 +143,11 @@ def main():
     parse.add_argument('files',
                        nargs='*',
                        help='''file names, defaults to stdin''')
+    return parse
 
+
+def main():
+    parse = config_args()
     args = parse.parse_args()
     handle_args(args)
 
