@@ -50,40 +50,40 @@ def byte_or_lines(args):
     return (count, by_line, seek_from)
 
 
-def by_line_print(fh, count, seek_from):
+def by_line_print(fh, filehandle, count, seek_from, out):
     if seek_from == os.SEEK_SET:
         #we need to skip count lines and it's negative so count up)
         for line in fh:
             if count < 0:
                 count += 1
                 continue
-            sys.stdout.write(line)
+            out.write(line)
     else:
         #need to find lines at end, this is probably inefficent
         d = deque(fh, count)
         for line in d:
-            sys.stdout.write(line)
+            out.write(line)
 
 
-def by_byte_print(fh, count, seek_from):
-    if fh is sys.stdin:
+def by_byte_print(fh, filename, count, seek_from, out):
+    if filename == 'standard input':
         if seek_from == os.SEEK_SET:
             fh.read(abs(count))
         else:
             data = fh.read()
-            sys.stdout.write(data[-1 * (count):])
+            out.write(data[-1 * (count):])
 
     else:
         fh.seek(count * -1, seek_from)
     for line in fh:
-        sys.stdout.write(line)
+        out.write(line)
 
 
-def style_print(fh, count, seek_from, by_line):
+def style_print(fh, filename, count, seek_from, by_line):
     if by_line:
-        by_line_print(fh, count, seek_from)
+        by_line_print(fh, filename, count, seek_from, sys.stdout)
     else:
-        by_byte_print(fh, count, seek_from)
+        by_byte_print(fh, filename, count, seek_from, sys.stdout)
 
 
 def generate_print_func(args):
@@ -95,7 +95,7 @@ def generate_print_func(args):
         print_name = filename
         if filename == '-':
             fh = sys.stdin
-            print_name = 'standard input'
+            filename = 'standard input'
         else:
             try:
                 fh = open(filename)
@@ -105,7 +105,7 @@ def generate_print_func(args):
                 return
         if verbose:
             print '==> {} <=='.format(print_name)
-        style_print(fh, count, seek_from, by_line)
+        style_print(fh, filename, count, seek_from, by_line)
         if filename != '-':
             fh.close()
         return
